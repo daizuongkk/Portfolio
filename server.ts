@@ -10,21 +10,21 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
+  "https://www.daizuongkk.id.vn",
+  "https://daizuongkk.id.vn",
   process.env.CLIENT_URL,
-  process.env.FRONTEND_URL, // For production frontend URL
-].filter(Boolean); // Remove undefined values
+  process.env.FRONTEND_URL,
+].filter((origin): origin is string => typeof origin === 'string' && origin.length > 0);
 
-// Middleware
+console.log("🔐 [STARTUP] Allowed Origins:", allowedOrigins);
+
+// Middleware - Allow all origins for CORS
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: true, // Allow all origins
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -32,15 +32,11 @@ const server = http.createServer(app);
 
 const io = new IOServer(server, {
   cors: {
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: true, // Allow all origins - Socket.IO will work with polling/websocket
     methods: ["GET", "POST"],
     credentials: true,
+    allowEIO3: true,
+    transports: ['websocket', 'polling'],
   },
 });
 
@@ -116,7 +112,8 @@ const generateColor = () => {
 
 // Socket.IO event handlers
 io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`✅ [SOCKET] User connected: ${socket.id}`);
+  console.log(`   Origin: ${socket.request.headers.origin}`);
 
   const clientIp =
     (socket.request.headers["x-forwarded-for"] as string)?.split(",")[0] ||
@@ -268,8 +265,13 @@ app.get("/health", (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
+  console.log(`\n${'='.repeat(60)}`);
   console.log(`🚀 Socket.IO server running on port ${PORT}`);
-  console.log(
-    `📍 Client URL: ${process.env.CLIENT_URL || "http://localhost:3000"}`,
-  );
+  console.log(`${'='.repeat(60)}`);
+  console.log(`\n✅ Server Configuration:`);
+  console.log(`   CLIENT_URL: ${process.env.CLIENT_URL || '(not set)'}`);
+  console.log(`   FRONTEND_URL: ${process.env.FRONTEND_URL || '(not set)'}`);
+  console.log(`   Allowed Origins: ${allowedOrigins.join(", ")}`);
+  console.log(`\n📍 Access Socket.IO at: http://localhost:${PORT}`);
+  console.log(`${'='.repeat(60)}\n`);
 });
