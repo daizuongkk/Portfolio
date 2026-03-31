@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:all": "concurrently \"npm run dev\" \"npm run server:dev\"",
     "server:dev": "tsx watch server.ts",
-    "server:build": "tsc server.ts",
+    "server:build": "tsc --project tsconfig.server.json",
     "server:start": "node server.js",
     "build": "next build",
     "start": "next start",

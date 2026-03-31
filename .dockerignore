@@ -1,0 +1,34 @@
+# Frontend files
+src/
+components.json
+next.config.mjs
+next-env.d.ts
+postcss.config.mjs
+tailwind.config.ts
+tsconfig.json
+
+# Git
+.git/
+.gitignore
+
+# Node
+node_modules/
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build output (only server.js needed)
+.next/
+dist/
+
+# Environment
+.env.local
+.env.*.local
