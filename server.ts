@@ -120,6 +120,18 @@ io.on("connection", (socket) => {
 
   const userAgent = socket.request.headers["user-agent"] || "Unknown";
 
+  // ✅ Filter out bots, crawlers, and health checkers
+  const botPatterns =
+    /bot|crawler|spider|scraper|curl|wget|postman|health|check/i;
+  const isBot = botPatterns.test(userAgent) || userAgent === "Unknown";
+
+  if (isBot) {
+    console.log(`⚠️  [BOT DETECTED] Rejecting connection from: ${clientIp}`);
+    console.log(`    User-Agent: ${userAgent}`);
+    socket.disconnect();
+    return;
+  }
+
   console.log(`✅ [SOCKET] User connected: ${socket.id}`);
   console.log(`   Origin: ${socket.request.headers.origin || "undefined"}`);
   console.log(`   IP: ${clientIp}`);
@@ -236,20 +248,28 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Listen to disconnection
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
+  // 🔄 Keep-alive ping handler
+  socket.on("pong", () => {
+    // Client responded to ping - connection is alive
+    console.log(`💓 [PING] User ${socket.id} is alive`);
+  });
 
-    // Mark user as offline instead of removing
+  // Listen to disconnection
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ User disconnected: ${socket.id}`);
+    console.log(`   Reason: ${reason}`);
+
+    // ✅ Remove user completely from sessions (they disappear from UI)
     const sessionKey = Array.from(sessions.entries()).find(
       ([_, u]) => u.socketId === socket.id,
     )?.[0];
     if (sessionKey) {
       const user = sessions.get(sessionKey)!;
-      user.isOnline = false;
-      user.lastSeen = new Date();
+      console.log(`🗑️  Removing user: ${user.name}`);
+      sessions.delete(sessionKey); // ⬅️ DELETE instead of marking offline
     }
 
+    console.log(`📊 Active users: ${sessions.size}`);
     io.emit("users-updated", Array.from(sessions.values()));
   });
 
@@ -261,6 +281,17 @@ io.on("connection", (socket) => {
     });
   }
 });
+
+// 🔄 Periodic health check - ping all clients every 30s
+setInterval(() => {
+  const connectedCount = io.engine.clientsCount;
+  if (connectedCount > 0) {
+    console.log(
+      `\n📡 [HEALTH CHECK] Pinging ${connectedCount} connected client(s)...`,
+    );
+    io.emit("ping");
+  }
+}, 30000); // Every 30 seconds
 
 // Health check endpoint
 app.get("/health", (req, res) => {

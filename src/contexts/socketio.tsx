@@ -5,6 +5,7 @@ import React, {
   ReactNode,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { io, Socket } from "socket.io-client";
@@ -67,8 +68,9 @@ const SocketContextProvider = ({ children }: { children: ReactNode }) => {
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
+  const socketRef = useRef<Socket | null>(null);
 
-  // SETUP SOCKET.IO
+  // SETUP SOCKET.IO - ONLY ONCE (prevent double connections from StrictMode)
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_WS_URL) {
       console.warn(
@@ -77,17 +79,30 @@ const SocketContextProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    // ✅ If socket already exists, don't create new one
+    if (socketRef.current?.connected) {
+      setSocket(socketRef.current);
+      return;
+    }
+
+    // ❌ Close old socket before creating new one (safety check)
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
     const socketInstance = io(process.env.NEXT_PUBLIC_WS_URL, {
       reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionDelay: 500, // ⬇️ Faster reconnect
+      reconnectionDelayMax: 10000, // ⬆️ But cap at 10s
+      reconnectionAttempts: Infinity, // ⬆️ Keep trying indefinitely
       autoConnect: true,
       auth: {
         sessionId: localStorage.getItem(SESSION_ID_KEY),
       },
+      transports: ["websocket", "polling"], // ✅ Fallback to polling if websocket fails
     });
 
+    socketRef.current = socketInstance;
     setSocket(socketInstance);
 
     // Connection events
@@ -167,8 +182,27 @@ const SocketContextProvider = ({ children }: { children: ReactNode }) => {
       console.error("❌ Socket error:", error);
     });
 
+    // 🔄 Keep-alive pong handler
+    socketInstance.on("ping", () => {
+      console.log("📡 Server ping received - responding with pong");
+      socketInstance.emit("pong");
+    });
+
+    // Cleanup only on unmount - don't disconnect on re-renders
     return () => {
-      socketInstance.disconnect();
+      // Don't disconnect here to prevent double connections in StrictMode
+      // Only cleanup listeners, not the connection
+      socketInstance.off("connect");
+      socketInstance.off("disconnect");
+      socketInstance.off("connect_error");
+      socketInstance.off("msgs-receive-init");
+      socketInstance.off("msg-receive");
+      socketInstance.off("msg-delete");
+      socketInstance.off("session");
+      socketInstance.off("users-updated");
+      socketInstance.off("warning");
+      socketInstance.off("error");
+      socketInstance.off("ping");
     };
   }, [toast]);
 
