@@ -148,15 +148,19 @@ export const useSounds = () => {
 
   // Send: Clear, slightly higher pitch, quick
   const playSendSound = useCallback(() => {
-    console.log("🔊 playSendSound called");
-    playTone(600, 300, 0.25, 0.08);
-  }, [playTone]);
+    console.log("🔊 playSendSound called - playing 600→300Hz");
+    const ctx = getContext();
+    console.log("   AudioContext state:", ctx?.state);
+    playTone(600, 300, 0.25, 0.15); // Increased volume from 0.08 to 0.15
+  }, [playTone, getContext]);
 
   // Receive: Lower pitch, bubble-like, slightly longer
   const playReceiveSound = useCallback(() => {
-    console.log("🔊 playReceiveSound called");
-    playTone(800, 400, 0.35, 0.1);
-  }, [playTone]);
+    console.log("🔊 playReceiveSound called - playing 800→400Hz");
+    const ctx = getContext();
+    console.log("   AudioContext state:", ctx?.state);
+    playTone(800, 400, 0.35, 0.2); // Increased volume from 0.1 to 0.2
+  }, [playTone, getContext]);
 
   return { playSendSound, playReceiveSound, playPressSound, playReleaseSound };
 };

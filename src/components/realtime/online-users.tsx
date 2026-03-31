@@ -35,7 +35,8 @@ const OnlineUsers = () => {
 
   useEffect(() => {
     if (msgs.length > prevMsgsLength.current) {
-      const isSmallBatch = msgs.length - prevMsgsLength.current <= 2;
+      const newMessageCount = msgs.length - prevMsgsLength.current;
+      const isSmallBatch = newMessageCount <= 2;
       const lastMsg = msgs[msgs.length - 1];
       let isRecent = true;
 
@@ -46,19 +47,32 @@ const OnlineUsers = () => {
         if (now - msgTime > 10000) isRecent = false;
       }
 
+      console.log("📨 Message update detected:", {
+        newCount: newMessageCount,
+        isSmallBatch,
+        isRecent,
+        lastMsgUsername: lastMsg?.username,
+        currentUserName: currentUser?.name,
+        currentUserId: currentUser?.id,
+      });
+
       if (isSmallBatch && isRecent && lastMsg) {
-        console.log("📨 New message:", {
-          username: lastMsg.username,
-          currentUserName: currentUser?.name,
-          isOwn: lastMsg.username === currentUser?.name,
+        const msgSenderName = lastMsg.username?.trim().toLowerCase() || "";
+        const currentUserName = currentUser?.name?.trim().toLowerCase() || "";
+        const isOwnMessage = msgSenderName === currentUserName;
+
+        console.log("🎵 Sound check:", {
+          msgSender: msgSenderName,
+          currentUser: currentUserName,
+          isOwnMessage,
         });
 
         // Play sound based on who sent the message
-        if (lastMsg.username === currentUser?.name) {
-          console.log("🔊 Playing SEND sound");
+        if (isOwnMessage) {
+          console.log("🔊 >>> Playing SEND sound (own message)");
           playSendSound();
         } else {
-          console.log("🔊 Playing RECEIVE sound");
+          console.log("🔊 >>> Playing RECEIVE sound (other user)");
           playReceiveSound();
         }
       }
