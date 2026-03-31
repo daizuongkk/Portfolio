@@ -113,13 +113,17 @@ const generateColor = () => {
 
 // Socket.IO event handlers
 io.on("connection", (socket) => {
-  console.log(`✅ [SOCKET] User connected: ${socket.id}`);
-  console.log(`   Origin: ${socket.request.headers.origin}`);
-
   const clientIp =
     (socket.request.headers["x-forwarded-for"] as string)?.split(",")[0] ||
     socket.request.socket.remoteAddress ||
     "Unknown";
+
+  const userAgent = socket.request.headers["user-agent"] || "Unknown";
+
+  console.log(`✅ [SOCKET] User connected: ${socket.id}`);
+  console.log(`   Origin: ${socket.request.headers.origin || "undefined"}`);
+  console.log(`   IP: ${clientIp}`);
+  console.log(`   User-Agent: ${userAgent.substring(0, 80)}`);
 
   const { location, country, flag } = getLocationInfo(clientIp);
   const color = generateColor();
