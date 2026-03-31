@@ -1,0 +1,35 @@
+# Frontend files not needed for server
+src/
+public/
+.next/
+.vercel/
+
+# Build outputs
+dist/
+server.js
+
+# Development
+node_modules
+.env.local
+.env.*.local
+pnpm-debug.log*
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Next.js files
+next.config.mjs
+tsconfig.json
+components.json
+postcss.config.mjs
+tailwind.config.ts
+
+# Content
+content/

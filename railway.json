@@ -1,0 +1,9 @@
+{
+  "build": {
+    "builder": "dockerfile"
+  },
+  "deploy": {
+    "startCommand": "npm run server:start",
+    "restartPolicyMaxRetries": 5
+  }
+}
