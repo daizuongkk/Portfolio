@@ -23,7 +23,7 @@ const config = {
   ],
   author: "Trong Dai Nguyen",
   email: "trongdaidt147@gmail.com",
-  site: "",
+  site: "https://daizuongkk.id.vn",
   // site: "https://nareshkhatri.site",
 
   // for github stars button

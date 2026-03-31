@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-import { Inter, Archivo_Black } from "next/font/google";
-import "./globals.css";
 import { config } from "@/data/config";
+import type { Metadata } from "next";
+import { Archivo_Black, Inter } from "next/font/google";
+import "./globals.css";
 
-import Header from "@/components/header/header";
-import Footer from "@/components/footer/footer";
-import Script from "next/script";
 import AppOverlays from "@/components/app-overlays";
+import Footer from "@/components/footer/footer";
+import Header from "@/components/header/header";
 import { Providers } from "@/components/providers";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: config.title,
@@ -57,7 +57,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={[inter.variable, archivoBlack.variable, "font-display"].join(" ")} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={[inter.variable, archivoBlack.variable, "font-display"].join(
+        " ",
+      )}
+      suppressHydrationWarning
+    >
       <head>
         <Script
           defer
