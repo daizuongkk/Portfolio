@@ -12,12 +12,29 @@ type Metadata = {
 };
 
 function getMDXFiles(dir: string) {
-  return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
+  try {
+    if (!fs.existsSync(dir)) {
+      console.warn(`Blog directory not found: ${dir}`);
+      return [];
+    }
+    return fs.readdirSync(dir).filter((file) => path.extname(file) === ".mdx");
+  } catch (error) {
+    console.error("Error reading MDX files:", error);
+    return [];
+  }
 }
 
 function readMDXFile(filePath: string) {
-  const rawContent = fs.readFileSync(filePath, "utf-8");
-  return matter(rawContent);
+  try {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    const rawContent = fs.readFileSync(filePath, "utf-8");
+    return matter(rawContent);
+  } catch (error) {
+    console.error("Error reading MDX file:", error);
+    throw error;
+  }
 }
 
 function getMDXData(dir: string) {
@@ -35,14 +52,32 @@ function getMDXData(dir: string) {
 }
 
 export function getBlogPosts() {
-  return getMDXData(path.join(process.cwd(), "src/content/blogs"));
+  try {
+    const blogsDir = path.join(process.cwd(), "src/content/blogs");
+    return getMDXData(blogsDir);
+  } catch (error) {
+    console.error("Error getting blog posts:", error);
+    return [];
+  }
 }
 
 export function getBlogPost(slug: string) {
-  const filePath = path.join(process.cwd(), "src/content/blogs", `${slug}.mdx`);
-  const { data, content } = readMDXFile(filePath);
-  return {
-    metadata: data as Metadata,
-    content,
-  };
+  try {
+    if (!slug) {
+      throw new Error("Slug is required");
+    }
+    const filePath = path.join(
+      process.cwd(),
+      "src/content/blogs",
+      `${slug}.mdx`,
+    );
+    const { data, content } = readMDXFile(filePath);
+    return {
+      metadata: data as Metadata,
+      content,
+    };
+  } catch (error) {
+    console.error(`Error getting blog post for slug "${slug}":`, error);
+    throw error;
+  }
 }
