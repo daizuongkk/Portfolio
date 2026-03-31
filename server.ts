@@ -37,9 +37,8 @@ const io = new IOServer(server, {
     origin: true, // Allow all origins - Socket.IO will work with polling/websocket
     methods: ["GET", "POST"],
     credentials: true,
-    allowEIO3: true,
-    transports: ["websocket", "polling"],
   },
+  transports: ["websocket", "polling"],
 });
 
 // Types
