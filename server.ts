@@ -14,7 +14,9 @@ const allowedOrigins = [
   "https://daizuongkk.id.vn",
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL,
-].filter((origin): origin is string => typeof origin === 'string' && origin.length > 0);
+].filter(
+  (origin): origin is string => typeof origin === "string" && origin.length > 0,
+);
 
 console.log("🔐 [STARTUP] Allowed Origins:", allowedOrigins);
 
@@ -36,7 +38,7 @@ const io = new IOServer(server, {
     methods: ["GET", "POST"],
     credentials: true,
     allowEIO3: true,
-    transports: ['websocket', 'polling'],
+    transports: ["websocket", "polling"],
   },
 });
 
@@ -265,13 +267,13 @@ app.get("/health", (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`\n${'='.repeat(60)}`);
+  console.log(`\n${"=".repeat(60)}`);
   console.log(`🚀 Socket.IO server running on port ${PORT}`);
-  console.log(`${'='.repeat(60)}`);
+  console.log(`${"=".repeat(60)}`);
   console.log(`\n✅ Server Configuration:`);
-  console.log(`   CLIENT_URL: ${process.env.CLIENT_URL || '(not set)'}`);
-  console.log(`   FRONTEND_URL: ${process.env.FRONTEND_URL || '(not set)'}`);
+  console.log(`   CLIENT_URL: ${process.env.CLIENT_URL || "(not set)"}`);
+  console.log(`   FRONTEND_URL: ${process.env.FRONTEND_URL || "(not set)"}`);
   console.log(`   Allowed Origins: ${allowedOrigins.join(", ")}`);
   console.log(`\n📍 Access Socket.IO at: http://localhost:${PORT}`);
-  console.log(`${'='.repeat(60)}\n`);
+  console.log(`${"=".repeat(60)}\n`);
 });
