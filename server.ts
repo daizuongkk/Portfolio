@@ -10,33 +10,21 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
-  "https://www.daizuongkk.id.vn",
-  "https://daizuongkk.id.vn",
   process.env.CLIENT_URL,
-  process.env.FRONTEND_URL,
-].filter((origin): origin is string => !!origin && typeof origin === "string");
-
-console.log("🔐 CORS allowed origins:", allowedOrigins);
+  process.env.FRONTEND_URL, // For production frontend URL
+].filter(Boolean); // Remove undefined values
 
 // Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc)
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn(`❌ CORS blocked origin: ${origin}`);
         callback(new Error("CORS not allowed"));
       }
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -45,15 +33,9 @@ const server = http.createServer(app);
 const io = new IOServer(server, {
   cors: {
     origin: (origin, callback) => {
-      // Allow requests with no origin
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn(`❌ Socket.IO CORS blocked origin: ${origin}`);
         callback(new Error("CORS not allowed"));
       }
     },
