@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: portfolio-server
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    port: 3001
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+    autoDeploy: true
